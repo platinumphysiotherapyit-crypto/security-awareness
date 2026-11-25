@@ -74,7 +74,11 @@ def save_step():
         )
 
         if r.status_code not in (200, 201, 204):
-            return jsonify({"error": "Record could not be saved"}), 502
+    print("SUPABASE ERROR:", r.status_code, r.text)
+    return jsonify({
+        "error": "Record could not be saved",
+        "status": r.status_code
+    }), 502
 
         return jsonify({"success": True, "step": step}), 201
 
