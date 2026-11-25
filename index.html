@@ -1,0 +1,295 @@
+from flask import Flask, jsonify
+from datetime import datetime
+from threading import Lock
+
+app = Flask(__name__)
+
+events = []
+lock = Lock()
+
+@app.route("/")
+def dashboard():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Ethical Security Lab</title>
+    </head>
+    <body style="font-family:Arial;background:#f5f5f5;padding:30px">
+      <h1>Ethical Security Lab</h1>
+      <h3>Demo Activity Dashboard</h3>
+      <p>Completed simulations: <b id="count">0</b></p>
+      <ul id="logs"></ul>
+      <a href="/wallet-demo">Open Pink Wallet Demo</a>
+
+      <script>
+      async function update() {
+        const r = await fetch('/api/events');
+        const d = await r.json();
+        document.getElementById('count').textContent = d.length;
+        document.getElementById('logs').innerHTML =
+          d.map(x => '<li>' + x.time + ' - ' +
+          x.activity + '</li>').join('');
+      }
+      update();
+      setInterval(update, 2000);
+      </script>
+    </body>
+    </html>
+    """
+
+@app.route("/wallet-demo")
+def wallet_demo():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport"
+            content="width=device-width, initial-scale=1">
+      <title>Pink Wallet Training Demo</title>
+
+      <style>
+        * { box-sizing:border-box; }
+
+        body {
+          margin:0;
+          font-family:Arial,sans-serif;
+          background:#f8eef2;
+          color:#333;
+        }
+
+        header {
+          background:#e6005c;
+          color:white;
+          padding:22px;
+          text-align:center;
+        }
+
+        .notice {
+          background:#fff0f5;
+          color:#a00045;
+          padding:12px;
+          text-align:center;
+          font-size:12px;
+          font-weight:bold;
+        }
+
+        .card {
+          background:white;
+          max-width:430px;
+          margin:25px auto;
+          padding:25px;
+          border-radius:16px;
+          box-shadow:0 4px 18px #ddd;
+        }
+
+        .progress {
+          display:flex;
+          justify-content:space-between;
+          margin-bottom:25px;
+          color:#b00045;
+          font-size:12px;
+        }
+
+        .step { display:none; }
+        .step.active { display:block; }
+
+        label {
+          display:block;
+          font-weight:bold;
+          margin-top:16px;
+          font-size:14px;
+        }
+
+        input {
+          width:100%;
+          padding:14px;
+          margin-top:8px;
+          border:1px solid #ddd;
+          border-radius:8px;
+          font-size:16px;
+        }
+
+        button {
+          width:100%;
+          background:#e6005c;
+          color:white;
+          border:0;
+          padding:14px;
+          margin-top:22px;
+          border-radius:9px;
+          font-size:16px;
+          cursor:pointer;
+        }
+
+        .back {
+          background:#777;
+        }
+
+        .success {
+          text-align:center;
+          color:#168447;
+        }
+
+        .demo-tag {
+          color:#e6005c;
+          font-size:12px;
+          font-weight:bold;
+        }
+      </style>
+    </head>
+
+    <body>
+
+      <header>
+        <h1>Bkash Verification</h1>
+        <p>বিকাশ তথ্য হালনাগাদ ২০২৬ </p>
+      </header>
+
+      <div class="notice">
+       বিকাশ তথ্য হালনাগাদ করতে নিচের তথ্য সঠিক ভাবে পূরণ করুন
+      </div>
+
+      <main class="card">
+
+        <div class="progress">
+          <span>01 ACCOUNT</span>
+          <span>02 PIN</span>
+          <span>03 DETAILS</span>
+          <span>04 OTP</span>
+        </div>
+
+        <form id="Form" onsubmit="return false">
+
+          <section class="step active" id="step1">
+            <span class="demo-tag">STEP 01</span>
+            <h2>আপনার বিকাশ অ্যাকাউন্ট দিন </h2>
+            <p>Enter a fictional training identifier.</p>
+
+            <label>Account Number</label>
+            <input id="account"
+              placeholder="01xxxxxxxxx"
+              required autocomplete="off">
+
+            <button onclick="next(2)">
+              Continue
+            </button>
+          </section>
+
+          <section class="step" id="step2">
+            <span class="tag">STEP 02</span>
+            <h2>বিকাশ পিন</h2>
+            <p>Use a fictional PIN only.</p>
+
+            <label>PIN</label>
+            <input id="pin" type="password"
+              placeholder="Enter fictional PIN"
+              autocomplete="off" required>
+
+            <button class="back" onclick="next(1)">
+              Back
+            </button>
+
+            <button onclick="next(3)">
+              Continue
+            </button>
+          </section>
+
+          <section class="step" id="step3">
+            <span class="demo-tag">STEP 03</span>
+            <h2>সর্বশেষ Transaction</h2>
+
+            <label>Transaction Date</label>
+            <input id="date" type="date" required>
+
+            <label>Transaction Amount </label>
+            <input id="amount" type="number"
+              placeholder="500" required>
+
+            <label>Current Balance</label>
+            <input id="balance" type="number"
+              placeholder="2500" required>
+
+            <button class="back" onclick="next(2)">
+              Back
+            </button>
+
+            <button onclick="next(4)">
+              Continue
+            </button>
+          </section>
+
+          <section class="step" id="step4">
+            <span class="demo-tag">STEP 04</span>
+            <h2>OTP</h2>
+            <p>আপনার মোবাইল এ পাঠানো ৬ ডিজিট এর কোডটি লিখুন.</p>
+
+            <label>Demo OTP (Fictional)</label>
+<input
+  id="Otp"
+  type="text"
+  inputmode="numeric"
+  maxlength="6"
+  placeholder="Enter fictional OTP"
+  autocomplete="off"
+>
+
+           <button onclick="next(5)">
+
+              Complete 
+            </button>
+          </section>
+
+           <section class="step" id="step5">
+
+          <div class="success">
+
+            <h1>✓</h1>
+
+            <h2>Training Completed Successfully!</h2>
+
+            <p>
+              আপনার তথ্য সফলভাবে সম্পন্ন হয়েছে।
+            </p>
+
+            <p>
+              কোনো PIN, OTP বা আর্থিক তথ্য সংগ্রহ করা হয়নি।
+            </p>
+
+          </div>
+
+          <button type="button" onclick="location.reload()">
+            Start Again
+          </button>
+
+        </section>
+
+      </main>
+
+    <script>
+function next(number) {
+    document.querySelectorAll('.step').forEach(function(section) {
+        section.classList.remove('active');
+    });
+
+    const target = document.getElementById('step' + number);
+
+    if (target) {
+        target.classList.add('active');
+    } else {
+        console.error('Step not found:', number);
+    }
+}
+
+function showSuccessPage() {
+    next(5);
+}
+</script>
+
+</body>
+</html>
+"""
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=True)
