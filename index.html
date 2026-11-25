@@ -269,24 +269,86 @@ def wallet_demo():
       </main>
 
     <script>
-function next(number) {
-    document.querySelectorAll('.step').forEach(function(section) {
-        section.classList.remove('active');
+
+async function next(number) {
+    const currentStep = number - 1;
+
+    // Save the previous training step
+    if (currentStep >= 1 && currentStep <= 4) {
+        const saved = await saveTrainingStep(currentStep);
+
+        if (!saved) {
+            alert("Training data save হয়নি। আবার চেষ্টা করুন।");
+            return;
+        }
+    }
+
+    // Show the next training section
+    document.querySelectorAll(".step").forEach(section => {
+        section.style.display = "none";
     });
 
-    const target = document.getElementById('step' + number);
+    const nextStep = document.getElementById("step" + number);
 
-    if (target) {
-        target.classList.add('active');
-    } else {
-        console.error('Step not found:', number);
+    if (nextStep) {
+        nextStep.style.display = "block";
+    }
+
+    // Save completion of final training step
+    if (number === 5) {
+        const saved = await saveTrainingStep(5);
+
+        if (!saved) {
+            alert("Training completion save হয়নি। আবার চেষ্টা করুন।");
+            return;
+        }
+
+        if (typeof showSuccessPage === "function") {
+            showSuccessPage();
+        }
     }
 }
 
-function showSuccessPage() {
     next(5);
 }
 </script>
+
+<script>
+const API_URL = "https://ethical-security-lab-api.onrender.com";
+
+const demoUserId = "DEMO-" + Date.now();
+
+async function saveTrainingStep(step) {
+    try {
+        const response = await fetch(`${API_URL}/api/step`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                demo_user_id: demoUserId,
+                step_number: step,
+                quiz_result: "Not attempted"
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            console.error("Save failed:", data);
+            return false;
+        }
+
+        console.log("Training step saved:", step);
+        return true;
+
+    } catch (error) {
+        console.error("Connection error:", error);
+        return false;
+    }
+}
+</script>
+</body>
 
 </body>
 </html>
