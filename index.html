@@ -270,10 +270,10 @@ def wallet_demo():
 
     <script>
 
+
 async function next(number) {
     const currentStep = number - 1;
 
-    // Save the previous training step
     if (currentStep >= 1 && currentStep <= 4) {
         const saved = await saveTrainingStep(currentStep);
 
@@ -283,7 +283,6 @@ async function next(number) {
         }
     }
 
-    // Show the next training section
     document.querySelectorAll(".step").forEach(section => {
         section.style.display = "none";
     });
@@ -294,7 +293,6 @@ async function next(number) {
         nextStep.style.display = "block";
     }
 
-    // Save completion of final training step
     if (number === 5) {
         const saved = await saveTrainingStep(5);
 
@@ -309,8 +307,6 @@ async function next(number) {
     }
 }
 
-    next(5);
-}
 </script>
 
 <script>
